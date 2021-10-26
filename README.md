@@ -41,7 +41,7 @@ $ python3 -m pip3 install -e .
 ## 3. Using Neurons
 From bash
 ```bash
-$ python3 neurons/text/template_neuron/main.py
+$ python3 neurons/text/template/main.py
 ```
 
 From python
