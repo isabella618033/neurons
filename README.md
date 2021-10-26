@@ -16,11 +16,13 @@ Opensource Bittensor Neurons
 
 </div>
 
+<div align="center">
 Neurons is a set of fully contained p2p Bittensor neuron-miners which run seamlessly on any one of our core networks.
+</div>
 
 - [1. Install](#2-install)
 - [3. Using Neurons](#3-using-bittensor)
-  - [3.1. Base](#31-bash)
+  - [3.1. Bash](#31-bash)
   - [3.2. Python](#32-python)
   - [3.3. CLI](#33-cli)
 
@@ -41,13 +43,13 @@ $ python3 -m pip3 install -e .
 ## 3. Using Neurons
 From bash
 ```bash
-$ python3 neurons/text/template_neuron/main.py
+$ python3 neurons/text/template/main.py
 ```
 
 From python
 ```python
 >> import neurons
->> neurons.text.template_neuron.neuron().run()
+>> neurons.text.template.neuron().run()
 ```
 
 From the cli.
