@@ -1,6 +1,3 @@
-# neurons
-Opensource Bittensor Neurons
-
 <div align="center">
 
 # **Bittensor** <!-- omit in toc -->
