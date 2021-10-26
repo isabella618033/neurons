@@ -41,13 +41,13 @@ $ python3 -m pip3 install -e .
 ## 3. Using Neurons
 From bash
 ```bash
-$ python3 neurons/text/base_neuron/main.py
+$ python3 neurons/text/template_neuron/main.py
 ```
 
 From python
 ```python
 >> import neurons
->> neurons.text.base_neuron.neuron().run()
+>> neurons.text.template_neuron.neuron().run()
 ```
 
 From the cli.

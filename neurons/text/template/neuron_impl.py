@@ -23,14 +23,11 @@ Example:
 
 """
 
-import argparse
 import bittensor
 import math
 import torch
 import traceback
-import os
 import sys
-from neurons.text.base_neuron.nucleus_impl import Nucleus
 import wandb
 
 from termcolor import colored
