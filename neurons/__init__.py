@@ -8,5 +8,5 @@ from neurons.text import template_miner,template_server,advanced_server,template
 __all_neurons__ =  { 'text_template_miner': template_miner.neuron, 
                      'text_template_validator': template_validator.neuron,
                      'text_template_server':template_server.neuron,
-                     'text_advanced_server':advanced_server,s}
+                     'text_advanced_server':advanced_server.neuron,}
 __text_neurons__ =  { 'text_template': template_miner.neuron }
