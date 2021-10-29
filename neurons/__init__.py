@@ -5,5 +5,8 @@ __version_as_int__ = (100 * int(version_split[0])) + (10 * int(version_split[1])
 
 from neurons.text import template_miner,template_server,advanced_server,template_validator
 
-__all_neurons__ =  { 'text_template': template_miner.neuron }
+__all_neurons__ =  { 'text_template_miner': template_miner.neuron, 
+                     'text_template_validator': template_validator.neuron,
+                     'text_template_server':template_server.neuron,
+                     'text_advanced_server':advanced_server,s}
 __text_neurons__ =  { 'text_template': template_miner.neuron }
