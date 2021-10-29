@@ -30,7 +30,7 @@ import sys
 import torch
 
 from . import neuron_impl
-from run import serve
+from . import run
 
 
 class neuron:
@@ -51,7 +51,7 @@ class neuron:
         self.config = config
 
     def run(self):
-        serve(self.config,self.model)
+        run.serve(self.config,self.model)
 
     @staticmethod
     def check_config( config: 'bittensor.Config' ):

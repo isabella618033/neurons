@@ -1,0 +1,101 @@
+# The MIT License (MIT)
+# Copyright © 2021 Yuma Rao
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+# documentation files (the “Software”), to deal in the Software without restriction, including without limitation 
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
+# and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of 
+# the Software.
+
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+# DEALINGS IN THE SOFTWARE.
+
+""" Base neuron.
+
+Example:
+    $ import neurons
+    $ neurons.text.base_neuron().run()
+
+"""
+
+import argparse
+import bittensor
+import os
+import sys
+import torch
+
+from . import neuron_impl
+from . import run
+
+
+class neuron:
+
+    def __init__(
+        self, 
+        config: 'bittensor.config' = None
+    ):
+        if config == None: config = neuron_impl.server.config()
+        config = config; 
+        self.check_config( config )
+        bittensor.logging (
+            config = config,
+            logging_dir = config.server.full_path,
+        )
+
+        self.model = neuron_impl.server(config=config,model_name='gpt2',pretrained=False)
+        self.config = config
+
+    
+    def run(self):
+        run.serve(self.config,self.model)
+
+    @staticmethod
+    def check_config( config: 'bittensor.Config' ):
+        r""" Checks/validates the config namespace object.
+        """
+        bittensor.logging.check_config( config )
+        bittensor.wallet.check_config( config )
+        bittensor.subtensor.check_config( config )
+        bittensor.metagraph.check_config( config )
+        bittensor.dataset.check_config( config )
+        bittensor.axon.check_config( config )
+        bittensor.wandb.check_config( config )
+        full_path = os.path.expanduser('{}/{}/{}/{}'.format( config.logging.logging_dir, config.wallet.name, config.wallet.hotkey, config.server.name ))
+        config.server.full_path = os.path.expanduser(full_path)
+        if not os.path.exists(config.server.full_path):
+            os.makedirs(config.server.full_path)
+            
+    def config ():
+        parser = argparse.ArgumentParser()    
+        parser.add_argument('--config', type=str, help='If set, defaults are overridden by passed file.')
+        parser.add_argument('--miner.name', type=str, help='Trials for this miner go in miner.root / (wallet_cold - wallet_hot) / miner.name ', default='template_miner')
+        parser.add_argument('--miner.resume', action='store_true', help='resume previous trial.', default=False)
+        parser.add_argument('--miner.topk', type=int, help='the number of peers queried during each remote forward call', default=20)
+        parser.add_argument('--miner.learning_rate', type=float, help='Training initial learning rate.', default=1)
+        parser.add_argument('--miner.learning_rate_chain', type=float, help='Training initial learning rate.', default=1)
+        parser.add_argument('--miner.momentum', type=float, help='optimizer momentum.', default=0.8)
+        parser.add_argument('--miner.blocks_per_epoch', type=int, help='Blocks per epoch', default=30)
+        parser.add_argument('--miner.n_topk_peer_weights', type=int, help='Maximum number of weights to submit to chain', default=100 )
+        parser.add_argument('--miner.device', type=str, help='miner default training device cpu/cuda', default=("cuda" if torch.cuda.is_available() else "cpu"))
+        parser.add_argument('--miner.clip_gradients', type=float, help='Implement gradient clipping to avoid exploding loss on smaller architectures.', default=1.0)
+        parser.add_argument('--nucleus.topk', type=int, help='the number of peers queried during each remote forward call', default=20)
+        parser.add_argument('--nucleus.noise_multiplier', type=float, help='Noise standard deviation multiplier. Increases query exploration.', default=1.0)
+        parser.add_argument('--nucleus.nhid', type=int, help='the dimension of the feedforward network model in nn.TransformerEncoder', default=200)
+        parser.add_argument('--nucleus.nhead', type=int, help='the number of heads in the multiheadattention models', default=2)
+        parser.add_argument('--nucleus.nlayers', type=int, help='the number of nn.TransformerEncoderLayer in nn.TransformerEncoder', default=2)
+        parser.add_argument('--nucleus.dropout', type=float, help='the dropout value', default=0.2)
+        parser.add_argument('--nucleus.punishment', type=float, help='the punishment for those not responding', default=0)
+
+        
+        bittensor.wallet.add_args( parser )
+        bittensor.dendrite.add_args( parser )
+        bittensor.subtensor.add_args( parser )
+        bittensor.logging.add_args( parser )
+        bittensor.dataset.add_args( parser )
+        bittensor.wandb.add_args(parser)
+        return bittensor.config( parser )
