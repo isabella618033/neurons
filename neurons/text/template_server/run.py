@@ -35,9 +35,6 @@ def serve( config, server ):
     # Create Subtensor connection
     subtensor = bittensor.subtensor(config = config)
 
-    # Init bittensor logging.
-    bittensor.logging( config = config )
-
     # Load/Create our bittensor wallet.
     wallet = bittensor.wallet( config = config ).create().register()
 
@@ -49,7 +46,7 @@ def serve( config, server ):
 
     # Instantiate the model we are going to serve on the network.
     # Miner training device.
-    model = server(config=config,model_name='bert-base-uncased',pretrained=False)
+    model = server
 
 
     # Create our optimizer.

@@ -47,10 +47,9 @@ class neuron:
             logging_dir = config.server.full_path,
         )
 
-        self.model = neuron_impl.server(config=config,model_name='gpt2',pretrained=False)
+        self.model =  neuron_impl.server(config=config)
         self.config = config
 
-    
     def run(self):
         serve(self.config,self.model)
 
