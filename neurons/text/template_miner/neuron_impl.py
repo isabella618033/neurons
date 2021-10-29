@@ -388,9 +388,9 @@ class Neuron:
         """
 
         try:
-            k = min(self.config.neuron.n_topk_peer_weights, bittensor.neuron.metagraph.n.item())
+            k = min(self.config.neuron.n_topk_peer_weights, self.metagraph.n.item())
             topk_scores, topk_uids = torch.topk( self.stats.ema_scores.detach(), k = k )
-            did_set = bittensor.neuron.subtensor.timeout_set_weights(
+            did_set = self.subtensor.timeout_set_weights(
                 timeout=10,
                 uids = topk_uids,
                 weights = topk_scores,

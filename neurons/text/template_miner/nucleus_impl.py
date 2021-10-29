@@ -218,7 +218,7 @@ class Nucleus(nn.Module):
         # ---- Topk Weights ---- (TODO: check if the gaussians are enough disrupt the chain weights)
         real_topk = min( self.config.nucleus.topk, self.metagraph.n.item(), len(active_uids))
         std = torch.std(active_peer_weights).item() if torch.std(active_peer_weights).item() else self.noise_offset
-        noise = torch.normal( 0, std, size=( active_peer_weights.size())).to( self.config.miner.device )
+        noise = torch.normal( 0, std, size=( active_peer_weights.size())).to( self.config.neuron.device )
         topk_weights, topk_idx = torch.topk(active_peer_weights + noise , real_topk, dim=0)
         topk_uids = active_uids[topk_idx]
 
@@ -234,9 +234,9 @@ class Nucleus(nn.Module):
         # ---- Join based on weights ----
         joining_uids= torch.where( return_ops == bittensor.proto.ReturnCode.Success )[0]
         joining_weights = F.softmax( topk_weights[(return_ops == bittensor.proto.ReturnCode.Success)], dim = 0 ) 
-        output = torch.zeros( (inputs.shape[0], inputs.shape[1], bittensor.__network_dim__)).to( self.config.miner.device )
+        output = torch.zeros( (inputs.shape[0], inputs.shape[1], bittensor.__network_dim__)).to( self.config.neuron.device )
         for index, joining_weight in enumerate( joining_weights ):
-            output += responses[joining_uids[index]].to( self.config.miner.device ) * joining_weight
+            output += responses[joining_uids[index]].to( self.config.neuron.device ) * joining_weight
 
         # ---- Punish peers with non-successful return ops ----
         with torch.no_grad():
