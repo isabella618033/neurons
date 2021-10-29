@@ -29,7 +29,7 @@ import os
 import sys
 import torch
 
-from . import neuron_impl
+from . import nucleus_impl
 from . import run
 
 
@@ -39,7 +39,7 @@ class neuron:
         self, 
         config: 'bittensor.config' = None
     ):
-        if config == None: config = neuron_impl.server.config()
+        if config == None: config = nucleus_impl.server.config()
         config = config; 
         self.check_config( config )
         bittensor.logging (
@@ -47,7 +47,7 @@ class neuron:
             logging_dir = config.server.full_path,
         )
 
-        self.model =  neuron_impl.server(config=config)
+        self.model =  nucleus_impl.server(config=config)
         self.config = config
 
     def run(self):

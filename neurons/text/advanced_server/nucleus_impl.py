@@ -215,7 +215,7 @@ class server(torch.nn.Module):
         parser.add_argument('--server.padding', type=bool, help='To pad out final dimensions',default=True)
         parser.add_argument('--server.interpolate', type=bool, help='To interpolate between sentence length',default=True)
         parser.add_argument('--server.inter_degree', type=str, help='Interpolate algorithm (nearest | linear | bilinear | bicubic | trilinear | area)', default='nearest')
-        parser.add_argument('--server.name', type=str, help='Trials for this miner go in miner.root / (wallet_cold - wallet_hot) / miner.name ', default='template_server')
+        parser.add_argument('--server.name', type=str, help='Trials for this miner go in miner.root / (wallet_cold - wallet_hot) / miner.name ', default='advanced_server')
         parser.add_argument('--server.checking', type=bool, help='To check if server settings are correct',default=True)
         parser.add_argument('--server.restart', action='store_true', help='if the model should restart', default=False)
         parser.add_argument('--server.blacklist.stake', type=float, help='Amount of stake (tao) in order not to get blacklisted', default=0)

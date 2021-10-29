@@ -38,24 +38,8 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 from loguru import logger; logger = logger.opt(colors=True)
 
 
-def main( config , validator):
+def main( config , validator, subtensor, wallet, metagraph, dataset, device, uid,dendrite):
     config.to_defaults()
-
-    print (config)
-    
-    # Init saving path for models 
-    save_path = os.path.expanduser('{}/{}/{}/{}'.format( config.logging.logging_dir, config.wallet.name, config.wallet.hotkey, config.miner.name ))
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    # Init bittensor logging.
-    bittensor.logging ( config = config )
-
-    # Load/Create our bittensor wallet.
-    wallet = bittensor.wallet ( config = config ).create_if_non_existent().register()
-
-    # Connect to the chain.
-    subtensor = bittensor.subtensor ( config = config )
 
     # Subscribe validator.
     subtensor.serve (
@@ -66,23 +50,6 @@ def main( config , validator):
         wait_for_inclusion = True,
         wait_for_finalization = False 
     )
-
-    # Load/Sync/Save our metagraph.
-    metagraph = bittensor.metagraph ( subtensor = subtensor ).load().sync().save()
-    
-    uid = metagraph.hotkeys.index ( wallet.hotkey.ss58_address )
-
-    # Create Dendrite.
-    dendrite = bittensor.dendrite ( config = config )
-
-    # Load genesis dataset.
-    dataset = bittensor.dataset ( config = config )
-
-    # Build Device.
-    device = torch.device ( device = config.miner.device )    
-
-    # Create validator model.
-    validator = validator
     
     optimizer = torch.optim.SGD(
         [ {'params': validator.peer_weights, 'lr': config.miner.learning_rate_chain} ],
@@ -95,7 +62,7 @@ def main( config , validator):
             config = config,
             cold_pubkey = wallet.coldkeypub.ss58_address,
             hot_pubkey = wallet.hotkey.ss58_address,
-            root_dir = save_path
+            root_dir = config.miner.full_path
         )
 
         wandb.watch( validator, log = 'all', log_freq = 50 )
@@ -103,10 +70,10 @@ def main( config , validator):
     # Optionally resume.
     if config.miner.resume:
         try:
-            validator.load_state_dict( torch.load("{}/validator.torch".format( save_path ))['validator'], strict=False )
+            validator.load_state_dict( torch.load("{}/validator.torch".format( config.miner.full_path ))['validator'], strict=False )
         except Exception as e:
             logger.error('Error reloading model: {} '.format(e))
-    torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( save_path ))
+    torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.miner.full_path ))
 
     # --- Run Forever.
     epoch = 0
@@ -214,6 +181,6 @@ def main( config , validator):
         # --- Save.
         if best_loss > epoch_loss : 
             best_loss = epoch_loss
-            torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( save_path ))
+            torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.miner.full_path ))
         epoch += 1
 

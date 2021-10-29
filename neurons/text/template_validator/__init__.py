@@ -29,7 +29,7 @@ import os
 import sys
 import torch
 
-from . import neuron_impl
+from . import nucleus_impl
 from . import run
 
 
@@ -39,20 +39,49 @@ class neuron:
         self, 
         config: 'bittensor.config' = None
     ):
-        if config == None: config = neuron_impl.server.config()
+        if config == None: config = neuron.config()
         config = config; 
         self.check_config( config )
         bittensor.logging (
             config = config,
-            logging_dir = config.server.full_path,
+            logging_dir = config.miner.full_path,
         )
-
-        self.model = neuron_impl.server(config=config,model_name='gpt2',pretrained=False)
         self.config = config
 
+        # Load/Create our bittensor wallet.
+        self.wallet = bittensor.wallet ( config = config ).create().register()
+
+        # Connect to the chain.
+        self.subtensor = bittensor.subtensor ( config = config )
     
+        # Load/Sync/Save our metagraph.
+        self.metagraph = bittensor.metagraph ( subtensor = self.subtensor ).load().sync().save()
+        
+        self.uid = self.metagraph.hotkeys.index ( self.wallet.hotkey.ss58_address )
+
+        # Create Dendrite.
+        self.dendrite = bittensor.dendrite ( config = config )
+
+        # Load genesis dataset.
+        self.dataset = bittensor.dataset ( config = config )
+
+        # Build Device.
+        self.device = torch.device ( device = config.miner.device )    
+
+        self.nucleus = nucleus_impl.Validator(config=config, metagraph = self.metagraph, dendrite = self.dendrite, device = self.device)
+
+
+
     def run(self):
-        run.serve(self.config,self.model)
+        run.main(self.config,
+                  validator = self.nucleus,
+                  subtensor = self.subtensor,
+                  wallet = self.wallet,
+                  metagraph = self.nucleus.metagraph,
+                  dataset = self.dataset,
+                  device = self.device,
+                  uid = self.uid,
+                  dendrite = self.nucleus.dendrite)
 
     @staticmethod
     def check_config( config: 'bittensor.Config' ):
@@ -63,13 +92,13 @@ class neuron:
         bittensor.subtensor.check_config( config )
         bittensor.metagraph.check_config( config )
         bittensor.dataset.check_config( config )
-        bittensor.axon.check_config( config )
+        bittensor.dendrite.check_config( config )
         bittensor.wandb.check_config( config )
-        full_path = os.path.expanduser('{}/{}/{}/{}'.format( config.logging.logging_dir, config.wallet.name, config.wallet.hotkey, config.server.name ))
-        config.server.full_path = os.path.expanduser(full_path)
-        if not os.path.exists(config.server.full_path):
-            os.makedirs(config.server.full_path)
-            
+        full_path = os.path.expanduser('{}/{}/{}/{}'.format( config.logging.logging_dir, config.wallet.name, config.wallet.hotkey, config.miner.name ))
+        config.miner.full_path = os.path.expanduser(full_path)
+        if not os.path.exists(config.miner.full_path):
+            os.makedirs(config.miner.full_path)
+
     def config ():
         parser = argparse.ArgumentParser()    
         parser.add_argument('--config', type=str, help='If set, defaults are overridden by passed file.')

@@ -27,7 +27,6 @@ import torch
 import time
 import wandb
 import datetime
-from neuron_impl import server
 
 def serve( config, server ):
     config.to_defaults()
@@ -83,28 +82,31 @@ def serve( config, server ):
         backward_text = backward_text,
     ).start().serve(subtensor=subtensor)
 
-    # --- Init Wandb.
-    with wandb.init (
-            config = config, 
-            name = datetime.datetime.now().strftime("%Y-%m-%d:%H-%M"),
-            project = wallet.coldkeypub.ss58_address[:8],
-            group = wallet.hotkey.ss58_address[:8],
-        ):
+    if config.wandb.api_key != 'default':
+        # --- Init Wandb.
+        bittensor.wandb(
+            config = config,
+            cold_pubkey = wallet.coldkeypub.ss58_address,
+            hot_pubkey = wallet.hotkey.ss58_address,
+            root_dir = config.server.full_path
+        )
 
-        # --- Run Forever.
-        while True:
-            end_block = subtensor.get_current_block() + config.server.blocks_per_epoch
-            while end_block >= subtensor.get_current_block():
-                time.sleep( bittensor.__blocktime__ )
-            metagraph.sync().save()
-            uid = metagraph.hotkeys.index( wallet.hotkey.ss58_address )
-            wandb_data = {
-                'stake': metagraph.S[ uid ].item(),
-                'rank': metagraph.R[ uid ].item(),
-                'incentive': metagraph.I[ uid ].item(),
-                'axon QPS': axon.stats.qps.value
-            } 
-            for uid_i, val in enumerate(metagraph.W[:,uid].tolist()):
-                wandb_data[ 'w_{},{}'.format(uid_i, uid) ] = val
+    # --- Run Forever.
+    while True:
+        end_block = subtensor.get_current_block() + config.server.blocks_per_epoch
+        while end_block >= subtensor.get_current_block():
+            time.sleep( bittensor.__blocktime__ )
+        metagraph.sync().save()
+        uid = metagraph.hotkeys.index( wallet.hotkey.ss58_address )
+        wandb_data = {
+            'stake': metagraph.S[ uid ].item(),
+            'rank': metagraph.R[ uid ].item(),
+            'incentive': metagraph.I[ uid ].item(),
+            'axon QPS': axon.stats.qps.value
+        } 
+        for uid_i, val in enumerate(metagraph.W[:,uid].tolist()):
+            wandb_data[ 'w_{},{}'.format(uid_i, uid) ] = val
+        if config.wandb.api_key != 'default':
             wandb.log( wandb_data )
-            
+
+        
