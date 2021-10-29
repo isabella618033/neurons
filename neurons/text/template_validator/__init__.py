@@ -73,7 +73,7 @@ class neuron:
 
 
     def run(self):
-        run.main(self.config,
+        run.run(self.config,
                   validator = self.nucleus,
                   subtensor = self.subtensor,
                   wallet = self.wallet,

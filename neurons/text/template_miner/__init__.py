@@ -55,8 +55,9 @@ class neuron:
         config: 'bittensor.config' = None
     ):
         if config == None: config = neuron.config()
-        config = config; 
+        config = config; print(config)
         cls.check_config( config )
+
         neuron_nucleus = nucleus( config )
         bittensor.logging (
             config = config,
