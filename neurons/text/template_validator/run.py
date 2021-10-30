@@ -43,20 +43,11 @@ from loguru import logger; logger = logger.opt(colors=True)
 def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid, dendrite):
     config.to_defaults()
 
-    # Subscribe validator.
-    subtensor.serve (
-        wallet = wallet,
-        ip = bittensor.utils.networking.get_external_ip(),
-        port = 8080,
-        modality = 0,
-        wait_for_inclusion = True,
-        wait_for_finalization = False 
-    )
     
     optimizer = torch.optim.SGD(
-        [ {'params': validator.peer_weights, 'lr': config.miner.learning_rate_chain} ],
-        lr = config.miner.learning_rate,
-        momentum = config.miner.momentum,
+        [ {'params': validator.peer_weights, 'lr': config.neuron.learning_rate_chain} ],
+        lr = config.neuron.learning_rate,
+        momentum = config.neuron.momentum,
     )
     if config.wandb.api_key != 'default':
         # Create wandb for telemetry.
@@ -64,18 +55,18 @@ def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid,
             config = config,
             cold_pubkey = wallet.coldkeypub.ss58_address,
             hot_pubkey = wallet.hotkey.ss58_address,
-            root_dir = config.miner.full_path
+            root_dir = config.neuron.full_path
         )
 
         wandb.watch( validator, log = 'all', log_freq = 50 )
 
     # Optionally resume.
-    if config.miner.resume:
+    if config.neuron.resume:
         try:
-            validator.load_state_dict( torch.load("{}/validator.torch".format( config.miner.full_path ))['validator'], strict=False )
+            validator.load_state_dict( torch.load("{}/validator.torch".format( config.neuron.full_path ))['validator'], strict=False )
         except Exception as e:
             logger.error('Error reloading model: {} '.format(e))
-    torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.miner.full_path ))
+    torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.neuron.full_path ))
 
     # --- Run Forever.
     epoch = 0
@@ -94,7 +85,7 @@ def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid,
 
         # --- Run epoch.
         start_block = subtensor.get_current_block() + 1
-        end_block = start_block + config.miner.blocks_per_epoch
+        end_block = start_block + config.neuron.blocks_per_epoch
         blocks = [ block for block in range(start_block, end_block) ]
         progress = qqdm( blocks, total=len(blocks), desc=format_str('white', f'Epoch'))
         progress.set_bar = partial(progress.set_bar,  element='#')
@@ -112,7 +103,7 @@ def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid,
                 val_score = validator.scores()
                 scores = torch.nn.functional.normalize ( torch.relu( val_score ), p=1, dim = 0 )
                 loss.backward()
-                clip_grad_norm_(validator.parameters(), config.miner.clip_gradients)
+                clip_grad_norm_(validator.parameters(), config.neuron.clip_gradients)
                 optimizer.step()
                 optimizer.zero_grad() 
                 global_step += 1
@@ -146,7 +137,7 @@ def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid,
         
         # --- End of epoch
         # --- Set mechanism weights.
-        topk_scores, topk_uids = torch.topk( ema_scores.detach(), k = min(config.miner.n_topk_peer_weights, metagraph.n.item())  )
+        topk_scores, topk_uids = torch.topk( ema_scores.detach(), k = min(config.neuron.n_topk_peer_weights, metagraph.n.item())  )
         subtensor.set_weights (
             uids = topk_uids,
             weights = topk_scores,
@@ -182,6 +173,6 @@ def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid,
         # --- Save.
         if best_loss > epoch_loss : 
             best_loss = epoch_loss
-            torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.miner.full_path ))
+            torch.save( { 'validator': validator.state_dict() }, "{}/validator.torch".format( config.neuron.full_path ))
         epoch += 1
 
