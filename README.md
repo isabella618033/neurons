@@ -28,8 +28,9 @@ Neurons is a set of fully contained p2p Bittensor neuron-miners which run seamle
 https://app.gitbook.com/@opentensor/s/bittensor/
 
 ## 2. Install
+Through bittensor
 ```bash
-$ python3 -m pip3 install neurons
+$ python3 -m pip3 install bittensor
 ```
 or from source
 ```bash
@@ -45,7 +46,7 @@ $ python3 neurons/text/template_miner/main.py
 
 From python
 ```python
->> import neurons
+>> import bittensor.neurons as neurons
 >> neurons.text.template_miner.neuron().run()
 ```
 
