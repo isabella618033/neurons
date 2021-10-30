@@ -88,7 +88,7 @@ class Neuron:
         self.fisher_ema_decay = 0.995
 
     def __enter__(self):
-        self.wallet.create()
+        self.wallet.create().register()
         self.metagraph.sync().save()
         self.axon.start().serve (
             use_upnpc = self.config.neuron.use_upnpc, 
