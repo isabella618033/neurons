@@ -15,19 +15,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 # DEALINGS IN THE SOFTWARE.
 
-""" Base neuron.
+""" Advanced server neurons
 
 Example:
     $ import neurons
-    $ neurons.text.base_neuron().run()
+    $ neurons.text.advanced_server().run()
 
 """
 
-import argparse
 import bittensor
 import os
-import sys
-import torch
 
 from . import nucleus_impl
 from . import run

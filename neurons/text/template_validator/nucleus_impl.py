@@ -1,7 +1,6 @@
 import bittensor
 import torch
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
-from torch.nn.utils import clip_grad_norm_
 import torch.nn.functional as F
 
 class Validator( torch.nn.Module ):

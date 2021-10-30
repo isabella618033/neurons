@@ -15,12 +15,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 # DEALINGS IN THE SOFTWARE.
 
-""" Base neuron.
+""" Template validator.
 
 Example:
     $ import neurons
-    $ neurons.text.base_neuron().run()
-
+    $ neurons.text.template_validator.neuron().run()
 """
 
 import argparse

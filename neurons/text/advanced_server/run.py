@@ -15,32 +15,24 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-""" The Exodus base client.
+""" Advanced server neuron.
 
 Example:
-    $ python miners/text/server/template_client.py
+    $ python miners/text/advanced_server/main.py
 
 """
-import argparse
-import traceback
-from bittensor._metagraph.metagraph_impl import Metagraph
-from logging import Logger, raiseExceptions
-from loguru import logger; logger = logger.opt(colors=True)
 import bittensor
 import torch
-import time
 import wandb
 import datetime
-from qqdm import qqdm
-from transformers import AutoModel,AutoTokenizer,AutoConfig
-from torch.nn.utils import clip_grad_norm_
-from torch.nn.utils.rnn import pad_sequence
-import concurrent
-from datetime import datetime,timedelta
-from threading import Thread, Lock
+import traceback
 import sys
 import os
-import torch.nn.functional as F
+
+from loguru import logger; logger = logger.opt(colors=True)
+from torch.nn.utils import clip_grad_norm_
+from datetime import datetime,timedelta
+from threading import Lock
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 def serve( config, server):

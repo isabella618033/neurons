@@ -21,29 +21,22 @@ Example:
     $ python miners/text/template_validator.py --logging.debug
 
 """
-import argparse
-import yaml
-from types import SimpleNamespace
 import bittensor
 import math
 import torch
 import wandb
-import datetime
-import os
 from termcolor import colored
 from functools import partial
 
 from torch.nn.utils import clip_grad_norm_
 import torch.nn.functional as F
 from qqdm import qqdm, format_str
-from torch.nn import TransformerEncoder, TransformerEncoderLayer
 from loguru import logger; logger = logger.opt(colors=True)
 
-
 def run( config , validator, subtensor, wallet, metagraph, dataset, device, uid, dendrite):
+    print(config)
     config.to_defaults()
 
-    
     optimizer = torch.optim.SGD(
         [ {'params': validator.peer_weights, 'lr': config.neuron.learning_rate_chain} ],
         lr = config.neuron.learning_rate,
