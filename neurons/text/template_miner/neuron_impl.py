@@ -47,7 +47,7 @@ class Neuron:
         r""" Initializes the neuron with the passed config.
         """
         self.config = config
-        self.wallet = bittensor.wallet ( config = self.config )
+        self.wallet = bittensor.wallet ( config = self.config ).register()
         self.subtensor = bittensor.subtensor ( config = self.config )
         self.metagraph = bittensor.metagraph ( config = self.config, subtensor = self.subtensor )
         self.dendrite = bittensor.dendrite ( config = self.config, wallet = self.wallet )
@@ -88,7 +88,7 @@ class Neuron:
         self.fisher_ema_decay = 0.995
 
     def __enter__(self):
-        self.wallet.create().register()
+        self.wallet().create()
         self.metagraph.sync().save()
         self.axon.start().serve (
             use_upnpc = self.config.neuron.use_upnpc, 
