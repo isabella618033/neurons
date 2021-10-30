@@ -46,7 +46,7 @@ class Neuron:
         r""" Initializes the neuron with the passed config.
         """
         self.config = config
-        self.wallet = bittensor.wallet ( config = self.config ).register()
+        self.wallet = bittensor.wallet ( config = self.config )
         self.subtensor = bittensor.subtensor ( config = self.config )
         self.metagraph = bittensor.metagraph ( config = self.config, subtensor = self.subtensor )
         self.dendrite = bittensor.dendrite ( config = self.config, wallet = self.wallet )
@@ -102,6 +102,7 @@ class Neuron:
         r""" Miner main loop.
         """
         # ---- Build Bittensor neuron ----
+        self.wallet.register()
         with self:
             if self.config.neuron.use_wandb:
                 bittensor.wandb(
